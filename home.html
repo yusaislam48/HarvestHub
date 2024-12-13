@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home - HarvestHub</title>
+  <!-- Google Font: Montserrat -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Montserrat', sans-serif;
+    }
+    .navbar {
+      background-color: #D9E3C6;
+    }
+    .hero-section {
+      height: 100vh;
+      background-image: url('/homeBg.jpg');
+      background-size: cover;
+      background-position: center;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 0 20px;
+    }
+    .hero-section h1 {
+      font-size: 3rem;
+      font-weight: bold;
+    }
+    .hero-section p {
+      font-size: 1.2rem;
+      margin: 20px 0;
+    }
+    .hero-section .btn {
+      background-color: #28a745;
+      color: white;
+      padding: 10px 20px;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 5px;
+    }
+    .hero-section .btn:hover {
+      background-color: #218838;
+    }
+    .section {
+      padding: 60px 20px;
+    }
+    .section h2 {
+      font-size: 2rem;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .team-section img {
+      border-radius: 50%;
+      width: 150px;
+      height: 150px;
+    }
+    .faq-section .accordion-button {
+      background-color: #D9E3C6;
+    }
+    .faq-section .accordion-button:hover {
+      background-color: #C4D3B3;
+    }
+    .footer {
+      background-color: #D9E3C6;
+      padding: 20px;
+      text-align: center;
+    }
+    .footer p {
+      margin: 0;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light">
+    <div class="container">
+      <a class="navbar-brand" href="#"><strong>HarvestHUB</strong></a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link active" href="#">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">About</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Contact Us</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Help</a></li>
+          <li class="nav-item"><a class="nav-link" href="/login.html">Log In</a></li>
+        </ul>
+        <form class="d-flex ms-3">
+          <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+          <button class="btn btn-outline-success" type="submit">Search</button>
+        </form>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <div class="hero-section">
+    <h1>HarvestHub</h1>
+    <p>Empowering area officers and farmers to monitor post-harvest processes, analyze losses, and implement effective measures to improve productivity.</p>
+    <a href="/login.html" class="btn">Get Started</a>
+  </div>
+
+  <!-- Features Section -->
+  <div class="section bg-light">
+    <div class="container">
+      <h2>Why Choose HarvestHub?</h2>
+      <div class="row">
+        <div class="col-md-4 text-center">
+          <h4>Track Losses</h4>
+          <p>Monitor post-harvest processes and reduce losses effectively.</p>
+        </div>
+        <div class="col-md-4 text-center">
+          <h4>Analyze Data</h4>
+          <p>Use detailed reports to analyze and improve productivity.</p>
+        </div>
+        <div class="col-md-4 text-center">
+          <h4>Streamline Workflows</h4>
+          <p>Save time and resources with efficient workflows.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- About Team Section -->
+  <div class="section">
+    <div class="container">
+      <h2>Meet Our Team</h2>
+      <div class="row text-center">
+        <div class="col-md-3">
+          <img src="https://via.placeholder.com/150" alt="Team Member">
+          <h5>John Doe</h5>
+          <p>Founder & CEO</p>
+        </div>
+        <div class="col-md-3">
+          <img src="https://via.placeholder.com/150" alt="Team Member">
+          <h5>Jane Smith</h5>
+          <p>Head of Operations</p>
+        </div>
+        <div class="col-md-3">
+          <img src="https://via.placeholder.com/150" alt="Team Member">
+          <h5>Mark Lee</h5>
+          <p>Technical Lead</p>
+        </div>
+        <div class="col-md-3">
+          <img src="https://via.placeholder.com/150" alt="Team Member">
+          <h5>Mark Lee</h5>
+          <p>Technical Lead</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ Section -->
+  <div class="section bg-light faq-section">
+    <div class="container">
+      <h2>Frequently Asked Questions</h2>
+      <div class="accordion" id="faqAccordion">
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="faq1">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1" aria-expanded="true" aria-controls="collapse1">
+              What is HarvestHub?
+            </button>
+          </h2>
+          <div id="collapse1" class="accordion-collapse collapse show" aria-labelledby="faq1" data-bs-parent="#faqAccordion">
+            <div class="accordion-body">
+              HarvestHub is a platform that empowers farmers and officers to monitor post-harvest processes and reduce losses effectively.
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="faq2">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2" aria-expanded="false" aria-controls="collapse2">
+              How does it help farmers?
+            </button>
+          </h2>
+          <div id="collapse2" class="accordion-collapse collapse" aria-labelledby="faq2" data-bs-parent="#faqAccordion">
+            <div class="accordion-body">
+              HarvestHub provides tools to track, analyze, and improve productivity, reducing post-harvest losses.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Call to Action Section -->
+  <div class="section">
+    <div class="container text-center">
+      <h2>Join HarvestHub Today</h2>
+      <p>Empower your farming process and make better decisions with HarvestHub.</p>
+      <a href="#" class="btn">Get Started</a>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2024 HarvestHub. All Rights Reserved. | Privacy Policy | Terms of Service</p>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

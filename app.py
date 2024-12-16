@@ -225,7 +225,6 @@ def get_harvest_ids(farmer_id):
     db.close()
     return jsonify(harvest_ids)
 
-
 @app.route('/get_initial_amount', methods=['POST'])
 def get_initial_amount():
     db = get_db_connection()
@@ -237,36 +236,43 @@ def get_initial_amount():
     harvest_id = data['harvest_id']
     stage = data['stage']
 
-    if stage == 'Harvesting':
-        # Fetch initial amount for Harvesting stage
-        cursor.execute("""
-            SELECT amount AS initial_amount
-            FROM harvest_details
-            WHERE farmer_id = %s AND id = %s
-        """, (farmer_id, harvest_id))
-    else:
-        # Fetch remaining amount for subsequent stages
-        prev_stage = {
-            'Handling': 'harvesting_stage',
-            'Storage': 'handling_stage',
-            'Transportation': 'storage_stage'
-        }.get(stage)
+    try:
+        if stage == 'Harvesting':
+            # Fetch initial amount for Harvesting stage
+            cursor.execute("""
+                SELECT amount AS initial_amount
+                FROM harvest_details
+                WHERE farmer_id = %s AND id = %s
+            """, (farmer_id, harvest_id))
+        else:
+            # Fetch remaining amount from the previous stage
+            prev_stage = {
+                'Handling': 'harvesting_stage',
+                'Storage': 'handling_stage',
+                'Transportation': 'storage_stage'
+            }.get(stage)
 
-        cursor.execute(f"""
-            SELECT remaining_amount AS initial_amount
-            FROM {prev_stage}
-            WHERE farmer_id = %s AND harvest_id = %s
-        """, (farmer_id, harvest_id))
+            if prev_stage:
+                cursor.execute(f"""
+                    SELECT remaining_amount AS initial_amount
+                    FROM {prev_stage}
+                    WHERE farmer_id = %s AND harvest_id = %s
+                """, (farmer_id, harvest_id))
+            else:
+                initial_amount = None
 
-    initial_amount = cursor.fetchone()
+        initial_amount = cursor.fetchone()
 
-    cursor.close()
-    db.close()
-
-    if initial_amount:
-        return jsonify(initial_amount)
-    else:
-        return jsonify({'initial_amount': None}), 404
+        if initial_amount:
+            return jsonify(initial_amount)
+        else:
+            return jsonify({'initial_amount': None}), 404
+    except Exception as e:
+        print("Error fetching initial amount:", e)
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cursor.close()
+        db.close()
 
 
 

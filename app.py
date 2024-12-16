@@ -192,8 +192,21 @@ def loss_record():
         else:
             table = None
 
-        # Insert into the relevant table
+        # Check if the record already exists
         if table:
+            cursor.execute(f"""
+                SELECT * FROM {table} 
+                WHERE farmer_id = %s AND harvest_id = %s
+            """, (farmer_id, harvest_id))
+            existing_record = cursor.fetchone()
+
+            if existing_record:
+                # Redirect with a message indicating the record already exists
+                cursor.close()
+                db.close()
+                return 'Data for this stage already exists. Please update it instead of re-entering.', 400
+
+            # Insert into the relevant table
             cursor.execute(f"""
                 INSERT INTO {table} (farmer_id, harvest_id, initial_amount, remaining_amount, loss_amount, loss_percentage)
                 VALUES (%s, %s, %s, %s, %s, %s)
@@ -204,13 +217,12 @@ def loss_record():
         db.close()
 
         # Redirect to the reports page or refresh the current page
-        return redirect(url_for('reports'))
+        return redirect(url_for('loss_record'))
 
     cursor.close()
     db.close()
 
     return render_template('lossRecord.html', farmers=farmers)
-
 
 @app.route('/get_harvest_ids/<int:farmer_id>')
 def get_harvest_ids(farmer_id):

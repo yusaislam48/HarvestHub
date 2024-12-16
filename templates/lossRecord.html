@@ -117,7 +117,7 @@
                 <!-- Farmer Dropdown -->
                 <div class="mb-3">
                   <label for="farmer" class="form-label">Select Farmer</label>
-                  <select class="form-select" id="farmer" name="farmer_id" required>
+                  <select class="form-select dropdown-toggle" id="farmer" name="farmer_id" required>
                     <option value="" disabled selected>Choose Farmer</option>
                     {% for farmer in farmers %}
                     <option value="{{ farmer['id'] }}">{{ farmer['name'] }}</option>
@@ -155,6 +155,27 @@
                 <div class="mb-3">
                   <label for="remainingAmount" class="form-label">Remaining Amount (Calculated)</label>
                   <input type="text" class="form-control" id="remainingAmount" name="remaining_amount" required>
+                </div>
+                <div class="mb-3">
+                  <label for="lossReason" class="form-label">Losses Reason</label>
+                  <select class="form-select" id="lossReason" name="loss_reason" required>
+                    <option value="" disabled selected>Select Losses Reason</option>
+                    <option value="Pests">Pests</option>
+                    <option value="Diseases">Diseases</option>
+                    <option value="Adverse Weather">Adverse Weather</option>
+                    <option value="Poor Handling">Poor Handling</option>
+                    <option value="Lack of Storage">Lack of Storage</option>
+                    <option value="Transportation Issues">Transportation Issues</option>
+                    <option value="Theft">Theft</option>
+                    <option value="Market Glut">Market Glut</option>
+                    <option value="Low Prices">Low Prices</option>
+                    <option value="Improper Drying">Improper Drying</option>
+                    <option value="Packaging Issues">Packaging Issues</option>
+                    <option value="Delayed Harvesting">Delayed Harvesting</option>
+                    <option value="Processing Loss">Processing Loss</option>
+                    <option value="Infrastructure Issues">Infrastructure Issues</option>
+                    <option value="Others">Others</option>
+                  </select>
                 </div>
                 <div class="mb-3">
                   <label for="lossAmount" class="form-label">Loss Amount (Calculated)</label>

@@ -179,6 +179,7 @@ def loss_record():
         remaining_amount = float(request.form['remaining_amount'])
         loss_amount = initial_amount - remaining_amount
         loss_percentage = (loss_amount / initial_amount) * 100
+        loss_reason = request.form['loss_reason']  # New loss reason field
 
         # Determine the table and data insertion logic based on the stage
         if stage == 'Harvesting':
@@ -208,21 +209,23 @@ def loss_record():
 
             # Insert into the relevant table
             cursor.execute(f"""
-                INSERT INTO {table} (farmer_id, harvest_id, initial_amount, remaining_amount, loss_amount, loss_percentage)
-                VALUES (%s, %s, %s, %s, %s, %s)
-            """, (farmer_id, harvest_id, initial_amount, remaining_amount, loss_amount, loss_percentage))
+                INSERT INTO {table} 
+                (farmer_id, harvest_id, initial_amount, remaining_amount, loss_amount, loss_percentage, loss_reason)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, (farmer_id, harvest_id, initial_amount, remaining_amount, loss_amount, loss_percentage, loss_reason))
             db.commit()
 
         cursor.close()
         db.close()
 
-        # Redirect to the reports page or refresh the current page
+        # Redirect to the loss record page
         return redirect(url_for('loss_record'))
 
     cursor.close()
     db.close()
 
     return render_template('lossRecord.html', farmers=farmers)
+
 
 @app.route('/get_harvest_ids/<int:farmer_id>')
 def get_harvest_ids(farmer_id):

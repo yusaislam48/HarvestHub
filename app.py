@@ -1,8 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, make_response
 import mysql.connector
 from config import DB_CONFIG  # Your MySQL credentials from config.py
-
-
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from io import BytesIO
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Change this to a random string for production use
@@ -365,6 +366,67 @@ def get_loss_data():
     finally:
         cursor.close()
         db.close()
+
+
+
+
+@app.route('/generate_report', methods=['GET'])
+def generate_report():
+    farmer_id = request.args.get('farmer_id')
+    harvest_id = request.args.get('harvest_id')
+
+    db = get_db_connection()
+    cursor = db.cursor(dictionary=True)
+
+    # Fetch Farmer Details
+    cursor.execute("SELECT * FROM farmers WHERE id = %s", (farmer_id,))
+    farmer = cursor.fetchone()
+
+    # Fetch Harvest Details
+    cursor.execute("SELECT * FROM harvest_details WHERE id = %s AND farmer_id = %s", (harvest_id, farmer_id))
+    harvest = cursor.fetchone()
+
+    # Fetch Stage Data
+    cursor.execute("""
+        SELECT 
+            COALESCE(hs.loss_amount, 0) AS harvesting_loss,
+            COALESCE(ss.loss_amount, 0) AS storage_loss,
+            COALESCE(hnd.loss_amount, 0) AS handling_loss,
+            COALESCE(ts.loss_amount, 0) AS transport_loss
+        FROM harvest_details h
+        LEFT JOIN harvesting_stage hs ON h.id = hs.harvest_id AND h.farmer_id = hs.farmer_id
+        LEFT JOIN storage_stage ss ON h.id = ss.harvest_id AND h.farmer_id = ss.farmer_id
+        LEFT JOIN handling_stage hnd ON h.id = hnd.harvest_id AND h.farmer_id = hnd.farmer_id
+        LEFT JOIN transportation_stage ts ON h.id = ts.harvest_id AND h.farmer_id = ts.farmer_id
+        WHERE h.farmer_id = %s AND h.id = %s
+    """, (farmer_id, harvest_id))
+    stage_data = cursor.fetchone()
+
+    cursor.close()
+    db.close()
+
+    # Generate PDF in memory
+    pdf_buffer = BytesIO()
+    c = canvas.Canvas(pdf_buffer, pagesize=letter)
+    c.drawString(100, 750, "Farmer Report")
+    c.drawString(100, 730, f"Farmer Name: {farmer['name']}")
+    c.drawString(100, 710, f"Harvest ID: {harvest['id']}")
+    c.drawString(100, 690, f"Harvesting Loss: {stage_data['harvesting_loss']} kg")
+    c.drawString(100, 670, f"Storage Loss: {stage_data['storage_loss']} kg")
+    c.drawString(100, 650, f"Handling Loss: {stage_data['handling_loss']} kg")
+    c.drawString(100, 630, f"Transport Loss: {stage_data['transport_loss']} kg")
+    c.save()
+
+    # Set the buffer's position to the beginning
+    pdf_buffer.seek(0)
+
+    # Create a Flask response with the PDF
+    response = make_response(pdf_buffer.getvalue())
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = 'inline; filename=report.pdf'
+
+    pdf_buffer.close()
+    return response
 
 
 # Route: Logout

@@ -163,6 +163,9 @@
               <label for="overallLossPercentage" class="form-label">Overall Loss Percentage (Calculated)</label>
               <input type="text" class="form-control wide-input" id="overallLossPercentage" readonly>
             </div>
+            <div class="mb-3 text-end">
+              <button type="button" class="btn btn-primary" id="getReport">Get Full Report</button>
+            </div>
           </form>
         </div>
         
@@ -237,6 +240,19 @@
           })
           .catch(error => console.error('Error fetching loss data:', error));
       });
+    });
+
+    document.getElementById('getReport').addEventListener('click', () => {
+      const farmerId = document.getElementById('farmer').value;
+      const harvestId = document.getElementById('harvestId').value;
+  
+      if (!farmerId || !harvestId) {
+        alert('Please select a Farmer and Harvest ID before generating the report.');
+        return;
+      }
+  
+      // Redirect to the report generation endpoint
+      window.location.href = `/generate_report?farmer_id=${farmerId}&harvest_id=${harvestId}`;
     });
       
   </script>

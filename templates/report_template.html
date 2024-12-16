@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Harvest Report</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #f4f4f4;
+    }
+  </style>
+</head>
+<body>
+  <h1>Harvest Report</h1>
+  <h2>Farmer Details</h2>
+  <p><strong>Name:</strong> {{ report_data['farmer']['name'] }}</p>
+  <p><strong>Address:</strong> {{ report_data['farmer']['address'] }}</p>
+  <p><strong>Phone:</strong> {{ report_data['farmer']['phone'] }}</p>
+
+  <h2>Officer Details</h2>
+  <p><strong>Officer Name:</strong> {{ report_data['officer']['officer_name'] }}</p>
+  <p><strong>Region:</strong> {{ report_data['officer']['region'] }}</p>
+
+  <h2>Harvest Details</h2>
+  <p><strong>Harvest ID:</strong> {{ report_data['harvest']['id'] }}</p>
+  <p><strong>Crop:</strong> {{ report_data['harvest']['crop_type'] }}</p>
+  <p><strong>Season:</strong> {{ report_data['harvest']['season'] }}</p>
+  <p><strong>Date:</strong> {{ report_data['harvest']['harvest_date'] }}</p>
+
+  <h2>Stage-Wise Loss Data</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Stage</th>
+        <th>Loss Amount</th>
+        <th>Loss Percentage</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Harvesting</td>
+        <td>{{ report_data['stage_data']['harvesting_loss_amount'] }}</td>
+        <td>{{ report_data['stage_data']['harvesting_loss_percentage'] }}%</td>
+      </tr>
+      <tr>
+        <td>Storage</td>
+        <td>{{ report_data['stage_data']['storage_loss_amount'] }}</td>
+        <td>{{ report_data['stage_data']['storage_loss_percentage'] }}%</td>
+      </tr>
+      <tr>
+        <td>Handling</td>
+        <td>{{ report_data['stage_data']['handling_loss_amount'] }}</td>
+        <td>{{ report_data['stage_data']['handling_loss_percentage'] }}%</td>
+      </tr>
+      <tr>
+        <td>Transportation</td>
+        <td>{{ report_data['stage_data']['transport_loss_amount'] }}</td>
+        <td>{{ report_data['stage_data']['transport_loss_percentage'] }}%</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Summary</h2>
+  <p><strong>Total Harvested Amount:</strong> {{ report_data['stage_data']['total_harvested'] }}</p>
+  <p><strong>Total Remaining Amount:</strong> {{ report_data['stage_data']['total_remaining'] }}</p>
+  <p><strong>Total Loss Amount:</strong> {{ report_data['stage_data']['total_loss'] }}</p>
+</body>
+</html>

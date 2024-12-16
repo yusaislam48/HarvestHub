@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmer Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        h1, h2 {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Farmer Harvest Report</h1>
+
+    <h2>Farmer Details</h2>
+    <p><b>Name:</b> {{ farmer.name }}</p>
+    <p><b>Phone:</b> {{ farmer.phone }}</p>
+    <p><b>Address:</b> {{ farmer.address }}</p>
+    <p><b>Region:</b> {{ officer.region }}</p>
+
+    <h2>Managing Officer</h2>
+    <p><b>Officer Name:</b> {{ officer.officer_name }}</p>
+
+    <h2>Harvest Details</h2>
+    <p><b>Harvest ID:</b> {{ harvest.id }}</p>
+    <p><b>Crop Type:</b> {{ harvest.crop_type }}</p>
+    <p><b>Season:</b> {{ harvest.season }}</p>
+    <p><b>Harvest Date:</b> {{ harvest.harvest_date }}</p>
+    <p><b>Amount Harvested:</b> {{ harvest.amount }} kg</p>
+
+    <h2>Stage-Wise Loss Data</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Stage</th>
+                <th>Loss Amount (kg)</th>
+                <th>Loss Percentage (%)</th>
+                <th>Loss Reason</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Harvesting</td>
+                <td>{{ stage_data.harvesting_loss }}</td>
+                <td>{{ stage_data.harvesting_percentage }}</td>
+                <td>{{ stage_data.harvesting_reason }}</td>
+            </tr>
+            <tr>
+                <td>Storage</td>
+                <td>{{ stage_data.storage_loss }}</td>
+                <td>{{ stage_data.storage_percentage }}</td>
+                <td>{{ stage_data.storage_reason }}</td>
+            </tr>
+            <tr>
+                <td>Handling</td>
+                <td>{{ stage_data.handling_loss }}</td>
+                <td>{{ stage_data.handling_percentage }}</td>
+                <td>{{ stage_data.handling_reason }}</td>
+            </tr>
+            <tr>
+                <td>Transportation</td>
+                <td>{{ stage_data.transport_loss }}</td>
+                <td>{{ stage_data.transport_percentage }}</td>
+                <td>{{ stage_data.transport_reason }}</td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

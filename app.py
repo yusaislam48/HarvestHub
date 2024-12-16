@@ -4,6 +4,9 @@ from config import DB_CONFIG  # Your MySQL credentials from config.py
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from io import BytesIO
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
+from reportlab.lib.styles import getSampleStyleSheet
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Change this to a random string for production use
@@ -368,8 +371,7 @@ def get_loss_data():
         db.close()
 
 
-
-
+## generate report start
 @app.route('/generate_report', methods=['GET'])
 def generate_report():
     farmer_id = request.args.get('farmer_id')
@@ -381,18 +383,41 @@ def generate_report():
     # Fetch Farmer Details
     cursor.execute("SELECT * FROM farmers WHERE id = %s", (farmer_id,))
     farmer = cursor.fetchone()
+    if not farmer:
+        return "Error: Farmer not found.", 404
 
     # Fetch Harvest Details
     cursor.execute("SELECT * FROM harvest_details WHERE id = %s AND farmer_id = %s", (harvest_id, farmer_id))
     harvest = cursor.fetchone()
+    if not harvest:
+        return "Error: Harvest details not found.", 404
+
+    # Fetch Officer Details
+    cursor.execute("""
+        SELECT ao.name AS officer_name, ao.region
+        FROM area_officers ao
+        JOIN farmers f ON ao.region = f.region_id
+        WHERE f.id = %s
+    """, (farmer_id,))
+    officer = cursor.fetchone()
+    if not officer:
+        officer = {'officer_name': 'Unknown', 'region': 'Unknown'}
 
     # Fetch Stage Data
     cursor.execute("""
         SELECT 
             COALESCE(hs.loss_amount, 0) AS harvesting_loss,
+            COALESCE(hs.loss_percentage, 0) AS harvesting_percentage,
+            COALESCE(hs.loss_reason, 'N/A') AS harvesting_reason,
             COALESCE(ss.loss_amount, 0) AS storage_loss,
+            COALESCE(ss.loss_percentage, 0) AS storage_percentage,
+            COALESCE(ss.loss_reason, 'N/A') AS storage_reason,
             COALESCE(hnd.loss_amount, 0) AS handling_loss,
-            COALESCE(ts.loss_amount, 0) AS transport_loss
+            COALESCE(hnd.loss_percentage, 0) AS handling_percentage,
+            COALESCE(hnd.loss_reason, 'N/A') AS handling_reason,
+            COALESCE(ts.loss_amount, 0) AS transport_loss,
+            COALESCE(ts.loss_percentage, 0) AS transport_percentage,
+            COALESCE(ts.loss_reason, 'N/A') AS transport_reason
         FROM harvest_details h
         LEFT JOIN harvesting_stage hs ON h.id = hs.harvest_id AND h.farmer_id = hs.farmer_id
         LEFT JOIN storage_stage ss ON h.id = ss.harvest_id AND h.farmer_id = ss.farmer_id
@@ -401,33 +426,101 @@ def generate_report():
         WHERE h.farmer_id = %s AND h.id = %s
     """, (farmer_id, harvest_id))
     stage_data = cursor.fetchone()
+    if not stage_data:
+        stage_data = {
+            'harvesting_loss': 0, 'harvesting_percentage': 0, 'harvesting_reason': 'N/A',
+            'storage_loss': 0, 'storage_percentage': 0, 'storage_reason': 'N/A',
+            'handling_loss': 0, 'handling_percentage': 0, 'handling_reason': 'N/A',
+            'transport_loss': 0, 'transport_percentage': 0, 'transport_reason': 'N/A'
+        }
 
     cursor.close()
     db.close()
 
-    # Generate PDF in memory
+    # Generate PDF using ReportLab
     pdf_buffer = BytesIO()
-    c = canvas.Canvas(pdf_buffer, pagesize=letter)
-    c.drawString(100, 750, "Farmer Report")
-    c.drawString(100, 730, f"Farmer Name: {farmer['name']}")
-    c.drawString(100, 710, f"Harvest ID: {harvest['id']}")
-    c.drawString(100, 690, f"Harvesting Loss: {stage_data['harvesting_loss']} kg")
-    c.drawString(100, 670, f"Storage Loss: {stage_data['storage_loss']} kg")
-    c.drawString(100, 650, f"Handling Loss: {stage_data['handling_loss']} kg")
-    c.drawString(100, 630, f"Transport Loss: {stage_data['transport_loss']} kg")
-    c.save()
+    pdf = SimpleDocTemplate(pdf_buffer, pagesize=letter)
+    elements = []
+
+    styles = getSampleStyleSheet()
+    title_style = styles['Title']
+    normal_style = styles['Normal']
+
+    # Title
+    elements.append(Paragraph("Farmer Harvest Report", title_style))
+
+    # Farmer Details
+    elements.append(Paragraph("<b>Farmer Details:</b>", normal_style))
+    farmer_details = [
+        ["Name:", farmer['name']],
+        ["Phone:", farmer['phone']],
+        ["Address:", farmer['address']],
+        ["Region:", officer['region']],
+    ]
+    elements.append(Table(farmer_details, style=[
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+        ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
+        ('TEXTCOLOR', (0, 0), (-1, -1), colors.darkblue),
+        ('FONTNAME', (0, 0), (-1, -1), 'Helvetica-Bold'),
+    ]))
+
+    # Officer Details
+    elements.append(Paragraph("<b>Managing Officer:</b>", normal_style))
+    officer_details = [
+        ["Officer Name:", officer['officer_name']],
+        ["Region:", officer['region']],
+    ]
+    elements.append(Table(officer_details, style=[
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+        ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
+        ('TEXTCOLOR', (0, 0), (-1, -1), colors.darkgreen),
+    ]))
+
+    # Harvest Details
+    elements.append(Paragraph("<b>Harvest Details:</b>", normal_style))
+    harvest_details = [
+        ["Harvest ID:", harvest['id']],
+        ["Crop Type:", harvest['crop_type']],
+        ["Season:", harvest['season']],
+        ["Harvest Date:", harvest['harvest_date']],
+        ["Amount Harvested:", f"{harvest['amount']} kg"],
+    ]
+    elements.append(Table(harvest_details, style=[
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+        ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
+        ('TEXTCOLOR', (0, 0), (-1, -1), colors.darkred),
+    ]))
+
+    # Stage-Wise Loss Data
+    elements.append(Paragraph("<b>Stage-Wise Loss Data:</b>", normal_style))
+    stage_data_table = [
+        ["Stage", "Loss Amount (kg)", "Loss Percentage (%)", "Loss Reason"],
+        ["Harvesting", stage_data['harvesting_loss'], stage_data['harvesting_percentage'], stage_data['harvesting_reason']],
+        ["Storage", stage_data['storage_loss'], stage_data['storage_percentage'], stage_data['storage_reason']],
+        ["Handling", stage_data['handling_loss'], stage_data['handling_percentage'], stage_data['handling_reason']],
+        ["Transportation", stage_data['transport_loss'], stage_data['transport_percentage'], stage_data['transport_reason']],
+    ]
+    elements.append(Table(stage_data_table, style=[
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+        ('BACKGROUND', (0, 0), (3, 0), colors.lightblue),
+        ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
+        ('ALIGN', (1, 0), (-1, -1), 'CENTER'),
+    ]))
+
+    # Build the PDF
+    pdf.build(elements)
 
     # Set the buffer's position to the beginning
     pdf_buffer.seek(0)
 
-    # Create a Flask response with the PDF
+    # Create Flask response
     response = make_response(pdf_buffer.getvalue())
     response.headers['Content-Type'] = 'application/pdf'
-    response.headers['Content-Disposition'] = 'inline; filename=report.pdf'
+    response.headers['Content-Disposition'] = 'inline; filename=farmer_report.pdf'
 
     pdf_buffer.close()
     return response
-
+## generate report end
 
 # Route: Logout
 @app.route('/logout')

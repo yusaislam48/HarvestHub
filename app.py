@@ -291,6 +291,82 @@ def get_initial_amount():
 
 
 
+@app.route('/analytics_and_reports', methods=['GET'])
+def analytics_and_reports():
+    db = get_db_connection()
+    cursor = db.cursor(dictionary=True)
+
+    # Fetch all farmers for the dropdown
+    cursor.execute("SELECT id, name FROM farmers")
+    farmers = cursor.fetchall()
+
+    cursor.close()
+    db.close()
+
+    # Render the Analytics & Reports page with the list of farmers
+    return render_template('analyticsAndReports.html', farmers=farmers)
+@app.route('/get_loss_data', methods=['POST'])
+def get_loss_data():
+    db = get_db_connection()
+    cursor = db.cursor(dictionary=True)
+
+    try:
+        data = request.json
+        farmer_id = data['farmer_id']
+        harvest_id = data['harvest_id']
+
+        # Fetch loss data with priority for remaining_amount
+        cursor.execute("""
+            SELECT 
+                h.amount AS total_harvested,
+                COALESCE(ts.remaining_amount, 
+                    s.remaining_amount, 
+                    hnd.remaining_amount, 
+                    hs.remaining_amount, 
+                    0) AS total_remaining, -- Priority: transportation > storage > handling > harvesting
+                COALESCE(hs.loss_percentage, 0) AS harvesting_loss,
+                COALESCE(s.loss_percentage, 0) AS storage_loss,
+                COALESCE(hnd.loss_percentage, 0) AS handling_loss,
+                COALESCE(ts.loss_percentage, 0) AS transport_loss
+            FROM harvest_details h
+            LEFT JOIN transportation_stage ts ON h.id = ts.harvest_id AND h.farmer_id = ts.farmer_id
+            LEFT JOIN storage_stage s ON h.id = s.harvest_id AND h.farmer_id = s.farmer_id
+            LEFT JOIN handling_stage hnd ON h.id = hnd.harvest_id AND h.farmer_id = hnd.farmer_id
+            LEFT JOIN harvesting_stage hs ON h.id = hs.harvest_id AND h.farmer_id = hs.farmer_id
+            WHERE h.farmer_id = %s AND h.id = %s
+        """, (farmer_id, harvest_id))
+
+        result = cursor.fetchone()
+
+        if not result:
+            result = {
+                'total_harvested': 0,
+                'total_remaining': 0,
+                'harvesting_loss': 0,
+                'storage_loss': 0,
+                'handling_loss': 0,
+                'transport_loss': 0
+            }
+
+        total_harvested = float(result['total_harvested'] or 0)
+        total_remaining = float(result['total_remaining'] or 0)
+        total_loss = total_harvested - total_remaining
+
+        result.update({
+            'total_loss': total_loss
+        })
+
+        return jsonify(result)
+
+    except Exception as e:
+        print("Error in /get_loss_data:", str(e))
+        return jsonify({'error': str(e)}), 500
+
+    finally:
+        cursor.close()
+        db.close()
+
+
 # Route: Logout
 @app.route('/logout')
 def logout():

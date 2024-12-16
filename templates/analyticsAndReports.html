@@ -108,48 +108,52 @@
           <h3>Stage-Wise Loss Overview</h3>
           <form>
             <!-- Dropdown and Stage-Wise Inputs -->
-            <div class="mb-3">
-              <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Select Harvest ID
-              </button>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="#">Harvest 1</a></li>
-                <li><a class="dropdown-item" href="#">Harvest 2</a></li>
-                <li><a class="dropdown-item" href="#">Harvest 3</a></li>
-              </ul>
-            </div>
-
             <div class="row mb-3">
               <div class="col-md-3">
+                <label for="farmer" class="form-label">Select Farmer</label>
+                <select class="form-select" id="farmer" name="farmer_id" required>
+                  <option value="" disabled selected>Choose Farmer</option>
+                  {% for farmer in farmers %}
+                  <option value="{{ farmer['id'] }}">{{ farmer['name'] }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label for="harvestId" class="form-label">Select Harvest ID</label>
+                <select class="form-select" id="harvestId" name="harvest_id" required>
+                  <option value="" disabled selected>Choose Harvest ID</option>
+                </select>
+              </div>
+            </div>
+        
+            <div class="row mb-3 mt-3">
+              <div class="col-md-3">
                 <label for="harvestingLoss" class="form-label">Harvesting (%)</label>
-                <input type="text" class="form-control" id="harvestingLoss" placeholder="0.0">
+                <input type="text" class="form-control" id="harvestingLoss" placeholder="0.0" readonly>
               </div>
               <div class="col-md-3">
                 <label for="storageLoss" class="form-label">Storage (%)</label>
-                <input type="text" class="form-control" id="storageLoss" placeholder="0.0">
+                <input type="text" class="form-control" id="storageLoss" placeholder="0.0" readonly>
               </div>
               <div class="col-md-3">
                 <label for="handlingLoss" class="form-label">Handling (%)</label>
-                <input type="text" class="form-control" id="handlingLoss" placeholder="0.0">
+                <input type="text" class="form-control" id="handlingLoss" placeholder="0.0" readonly>
               </div>
               <div class="col-md-3">
                 <label for="transportLoss" class="form-label">Transportation (%)</label>
-                <input type="text" class="form-control" id="transportLoss" placeholder="0.0">
+                <input type="text" class="form-control" id="transportLoss" placeholder="0.0" readonly>
               </div>
             </div>
-
+        
             <!-- Overall Loss Summary -->
             <h3>Overall Loss Summary</h3>
             <div class="mb-3">
               <label for="totalHarvestedAmount" class="form-label">Total Harvested Amount</label>
-              <input type="text" class="form-control wide-input" id="totalHarvestedAmount" placeholder="e.g., 5000 kg">
+              <input type="text" class="form-control wide-input" id="totalHarvestedAmount" placeholder="e.g., 5000 kg" readonly>
             </div>
             <div class="mb-3">
               <label for="totalLossAmount" class="form-label">Total Loss Across All Stages</label>
-              <input type="text" class="form-control wide-input" id="totalLossAmount" placeholder="e.g., 5000 kg">
-            </div>
-            <div class="mb-3">
-              <button type="submit" class="btn btn-success">Submit</button>
+              <input type="text" class="form-control wide-input" id="totalLossAmount" placeholder="e.g., 5000 kg" readonly>
             </div>
             <div class="mb-3">
               <label for="remainingAmount" class="form-label">Total Remaining Amount (Calculated)</label>
@@ -161,11 +165,80 @@
             </div>
           </form>
         </div>
+        
       </div>
     </div>
   </div>
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const farmerDropdown = document.getElementById('farmer');
+      const harvestDropdown = document.getElementById('harvestId');
+    
+      // Fetch Harvest IDs when Farmer is selected
+      farmerDropdown.addEventListener('change', () => {
+        const farmerId = farmerDropdown.value;
+    
+        fetch(`/get_harvest_ids/${farmerId}`)
+          .then(response => response.json())
+          .then(harvestIds => {
+            harvestDropdown.innerHTML = '<option value="" disabled selected>Choose Harvest ID</option>';
+            harvestIds.forEach(id => {
+              const option = document.createElement('option');
+              option.value = id.id;
+              option.textContent = `Harvest ID: ${id.id}`;
+              harvestDropdown.appendChild(option);
+            });
+          })
+          .catch(error => console.error('Error fetching harvest IDs:', error));
+      });
+    
+      // Fetch Loss Data when Harvest ID is selected
+      harvestDropdown.addEventListener('change', () => {
+        const farmerId = farmerDropdown.value;
+        const harvestId = harvestDropdown.value;
+    
+        if (!farmerId || !harvestId) {
+          console.error('Farmer ID or Harvest ID is missing');
+          return;
+        }
+    
+        fetch('/get_loss_data', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ farmer_id: farmerId, harvest_id: harvestId })
+        })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then(data => {
+            console.log('Loss data received:', data);
+    
+            // Update fields with loss data
+            document.getElementById('harvestingLoss').value = data.harvesting_loss || '0.0';
+            document.getElementById('storageLoss').value = data.storage_loss || '0.0';
+            document.getElementById('handlingLoss').value = data.handling_loss || '0.0';
+            document.getElementById('transportLoss').value = data.transport_loss || '0.0';
+    
+            document.getElementById('totalHarvestedAmount').value = data.total_harvested || '0.0';
+            document.getElementById('remainingAmount').value = data.total_remaining || '0.0';
+            document.getElementById('totalLossAmount').value = data.total_loss || '0.0';
+    
+            const totalHarvested = parseFloat(data.total_harvested || 0);
+            const totalLoss = parseFloat(data.total_loss || 0);
+            const overallLossPercentage = totalHarvested > 0 ? ((totalLoss / totalHarvested) * 100).toFixed(2) : '0.0';
+    
+            document.getElementById('overallLossPercentage').value = overallLossPercentage;
+          })
+          .catch(error => console.error('Error fetching loss data:', error));
+      });
+    });
+      
+  </script>
 </body>
 </html>

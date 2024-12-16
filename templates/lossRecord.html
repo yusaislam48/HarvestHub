@@ -110,96 +110,172 @@
       <div class="col-md-10">
         <div class="profile-section px-5">
           <h3>Loss Records</h3>
-          <form>
+          <form method="POST" action="/loss_record">
             <div class="row mt-5">
               <!-- Left Side -->
               <div class="col-md-5">
+                <!-- Farmer Dropdown -->
                 <div class="mb-3">
-                  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    Select Farmer
-                  </button>
-                  <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="#">Farmer 1</a></li>
-                    <li><a class="dropdown-item" href="#">Farmer 2</a></li>
-                    <li><a class="dropdown-item" href="#">Farmer 3</a></li>
-                  </ul>
+                  <label for="farmer" class="form-label">Select Farmer</label>
+                  <select class="form-select" id="farmer" name="farmer_id" required>
+                    <option value="" disabled selected>Choose Farmer</option>
+                    {% for farmer in farmers %}
+                    <option value="{{ farmer['id'] }}">{{ farmer['name'] }}</option>
+                    {% endfor %}
+                  </select>
                 </div>
+          
+                <!-- Harvest ID Dropdown -->
                 <div class="mb-3">
-                  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    Select Harvest ID
-                  </button>
-                  <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="#">Menu Item 1</a></li>
-                    <li><a class="dropdown-item" href="#">Menu Item 2</a></li>
-                    <li><a class="dropdown-item" href="#">Menu Item 3</a></li>
-                  </ul>
+                  <label for="harvestId" class="form-label">Select Harvest ID</label>
+                  <select class="form-select" id="harvestId" name="harvest_id" required>
+                    <option value="" disabled selected>Choose Harvest ID</option>
+                  </select>
                 </div>
+          
+                <!-- Stage Dropdown -->
                 <div class="mb-3">
-                  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    Select a Stage
-                  </button>
-                  <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="#">Harvesting</a></li>
-                    <li><a class="dropdown-item" href="#">Handling</a></li>
-                    <li><a class="dropdown-item" href="#">Storage</a></li>
-                  </ul>
-                </div>
-                <div class="mb-3">
-                  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    Select a Loss Cause
-                  </button>
-                  <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="#">Menu Item</a></li>
-                    <li><a class="dropdown-item" href="#">Menu Item</a></li>
-                    <li><a class="dropdown-item" href="#">Menu Item</a></li>
-                  </ul>
+                  <label for="stage" class="form-label">Select Stage</label>
+                  <select class="form-select" id="stage" name="stage" required>
+                    <option value="" disabled selected>Choose Stage</option>
+                    <option value="Harvesting">Harvesting</option>
+                    <option value="Handling">Handling</option>
+                    <option value="Storage">Storage</option>
+                    <option value="Transportation">Transportation</option>
+                  </select>
                 </div>
               </div>
-
+          
               <!-- Right Side -->
               <div class="col-md-6">
                 <div class="mb-3">
                   <label for="initialAmount" class="form-label">Initial Amount (Quantity)</label>
-                  <input type="text" class="form-control" id="initialAmount" placeholder="e.g., 5000 kg">
-                </div>
-                <div class="mb-3">
-                  <label for="lossAmount" class="form-label">Loss Amount (Quantity)</label>
-                  <input type="text" class="form-control" id="lossAmount" placeholder="e.g., 5000 kg">
-                </div>
-                <div class="mb-3">
-                  <button type="submit" class="btn btn-success">Submit</button>
+                  <input type="text" class="form-control" id="initialAmount" name="initial_amount" readonly>
                 </div>
                 <div class="mb-3">
                   <label for="remainingAmount" class="form-label">Remaining Amount (Calculated)</label>
-                  <input type="text" class="form-control" id="remainingAmount" readonly>
+                  <input type="text" class="form-control" id="remainingAmount" name="remaining_amount" required>
                 </div>
                 <div class="mb-3">
-                  <label for="lossPercentage" class="form-label">Loss Percentage (Calculated)</label>
-                  <input type="text" class="form-control" id="lossPercentage" readonly>
+                  <label for="lossAmount" class="form-label">Loss Amount (Calculated)</label>
+                  <input type="text" class="form-control" id="lossAmount" name="loss_amount" readonly>
                 </div>
               </div>
             </div>
-
+          
+            <button type="submit" class="btn btn-success">Submit</button>
+          </form>
+          
+            <!-- Recommendations
             <hr>
-
-            <!-- Recommendations -->
             <div class="mb-3">
               <label for="recommendations" class="form-label">Recommendations</label>
               <textarea id="recommendations" class="form-control recommendations" rows="3" readonly>presets of preventative measures will appear here</textarea>
-            </div>
+            </div> -->
 
-            <!-- Save and Reports Buttons -->
+            <!-- Save and Reports Buttons 
             <div class="button-group">
               <button type="button" class="btn btn-success">Save Stage Data</button>
               <button type="button" class="btn btn-success">Go To Reports</button>
-            </div>
-          </form>
+            </div>-->
+          
         </div>
       </div>
     </div>
   </div>
 
   <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"> </script>
+  <script>
+    // Fetch Harvest IDs for Selected Farmer
+    document.getElementById('farmer').addEventListener('change', function () {
+      const farmerId = this.value;
+    
+      // Log the selected farmer ID
+      console.log('Selected Farmer ID:', farmerId);
+    
+      fetch(`/get_harvest_ids/${farmerId}`)
+        .then(response => response.json())
+        .then(harvestIds => {
+          // Log the response
+          console.log('Harvest IDs:', harvestIds);
+    
+          const harvestIdSelect = document.getElementById('harvestId');
+          harvestIdSelect.innerHTML = '<option value="" disabled selected>Choose Harvest ID</option>';
+    
+          harvestIds.forEach(id => {
+            const option = document.createElement('option');
+            option.value = id.id;
+            option.textContent = `Harvest ID: ${id.id}`;
+            harvestIdSelect.appendChild(option);
+          });
+        })
+        .catch(error => console.error('Error fetching harvest IDs:', error));
+    });
+    
+    // Fetch Initial Amount for Selected Stage
+    document.getElementById('stage').addEventListener('change', function () {
+      const farmerId = document.getElementById('farmer').value;
+      const harvestId = document.getElementById('harvestId').value;
+      const stage = this.value;
+    
+      if (!farmerId || !harvestId) {
+        alert('Please select a farmer and harvest ID first.');
+        return;
+      }
+    
+      console.log('Sending request to /get_initial_amount with:', { farmer_id: farmerId, harvest_id: harvestId, stage });
+    
+      fetch('/get_initial_amount', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ farmer_id: farmerId, harvest_id: harvestId, stage: stage })
+      })
+        .then(response => {
+          console.log('Response status:', response.status);
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log('Received data:', data);
+    
+          // Ensure the Initial Amount field is being updated
+          const initialAmountField = document.getElementById('initialAmount');
+          console.log('Initial Amount Field:', initialAmountField);
+    
+          if (data.initial_amount) {
+            initialAmountField.value = data.initial_amount;
+            console.log('Initial Amount updated to:', data.initial_amount);
+          } else {
+            initialAmountField.value = '';
+            console.warn('No initial amount provided in the response.');
+          }
+        })
+        .catch(error => console.error('Error fetching initial amount:', error));
+    });
+
+    document.getElementById('remainingAmount').addEventListener('input', function () {
+      const initialAmount = parseFloat(document.getElementById('initialAmount').value) || 0;
+      const remainingAmount = parseFloat(this.value) || 0;
+    
+      if (initialAmount > 0) {
+        const lossAmount = initialAmount - remainingAmount;
+        const lossPercentage = ((lossAmount / initialAmount) * 100).toFixed(2);
+    
+        document.getElementById('lossAmount').value = lossAmount.toFixed(2);
+        document.getElementById('lossPercentage').value = lossPercentage;
+      } else {
+        document.getElementById('lossAmount').value = '';
+        document.getElementById('lossPercentage').value = '';
+      }
+    });
+    
+    
+    
+  
+  </script>
+    
 </body>
 </html>

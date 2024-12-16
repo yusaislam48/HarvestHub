@@ -1,6 +1,8 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import mysql.connector
 from config import DB_CONFIG  # Your MySQL credentials from config.py
+
+
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Change this to a random string for production use
@@ -156,6 +158,116 @@ def harvesting_details():
     db.close()
 
     return render_template('harvestingDetails.html', farmers=farmers, crops=crops, seasons=seasons)
+
+
+# Route: Loss Record Page
+@app.route('/loss_record', methods=['GET', 'POST'])
+def loss_record():
+    db = get_db_connection()
+    cursor = db.cursor(dictionary=True)
+
+    # Fetch all farmers for the dropdown
+    cursor.execute("SELECT id, name FROM farmers")
+    farmers = cursor.fetchall()
+
+    if request.method == 'POST':
+        # Get form data
+        farmer_id = request.form['farmer_id']
+        harvest_id = request.form['harvest_id']
+        stage = request.form['stage']
+        initial_amount = float(request.form['initial_amount'])
+        remaining_amount = float(request.form['remaining_amount'])
+        loss_amount = initial_amount - remaining_amount
+        loss_percentage = (loss_amount / initial_amount) * 100
+
+        # Determine the table and data insertion logic based on the stage
+        if stage == 'Harvesting':
+            table = 'harvesting_stage'
+        elif stage == 'Handling':
+            table = 'handling_stage'
+        elif stage == 'Storage':
+            table = 'storage_stage'
+        elif stage == 'Transportation':
+            table = 'transportation_stage'
+        else:
+            table = None
+
+        # Insert into the relevant table
+        if table:
+            cursor.execute(f"""
+                INSERT INTO {table} (farmer_id, harvest_id, initial_amount, remaining_amount, loss_amount, loss_percentage)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (farmer_id, harvest_id, initial_amount, remaining_amount, loss_amount, loss_percentage))
+            db.commit()
+
+        cursor.close()
+        db.close()
+
+        # Redirect to the reports page or refresh the current page
+        return redirect(url_for('reports'))
+
+    cursor.close()
+    db.close()
+
+    return render_template('lossRecord.html', farmers=farmers)
+
+
+@app.route('/get_harvest_ids/<int:farmer_id>')
+def get_harvest_ids(farmer_id):
+    db = get_db_connection()
+    cursor = db.cursor(dictionary=True)
+
+    # Fetch all harvest IDs for the selected farmer
+    cursor.execute("SELECT id FROM harvest_details WHERE farmer_id = %s", (farmer_id,))
+    harvest_ids = cursor.fetchall()
+
+    cursor.close()
+    db.close()
+    return jsonify(harvest_ids)
+
+
+@app.route('/get_initial_amount', methods=['POST'])
+def get_initial_amount():
+    db = get_db_connection()
+    cursor = db.cursor(dictionary=True)
+
+    # Fetch the request data
+    data = request.json
+    farmer_id = data['farmer_id']
+    harvest_id = data['harvest_id']
+    stage = data['stage']
+
+    if stage == 'Harvesting':
+        # Fetch initial amount for Harvesting stage
+        cursor.execute("""
+            SELECT amount AS initial_amount
+            FROM harvest_details
+            WHERE farmer_id = %s AND id = %s
+        """, (farmer_id, harvest_id))
+    else:
+        # Fetch remaining amount for subsequent stages
+        prev_stage = {
+            'Handling': 'harvesting_stage',
+            'Storage': 'handling_stage',
+            'Transportation': 'storage_stage'
+        }.get(stage)
+
+        cursor.execute(f"""
+            SELECT remaining_amount AS initial_amount
+            FROM {prev_stage}
+            WHERE farmer_id = %s AND harvest_id = %s
+        """, (farmer_id, harvest_id))
+
+    initial_amount = cursor.fetchone()
+
+    cursor.close()
+    db.close()
+
+    if initial_amount:
+        return jsonify(initial_amount)
+    else:
+        return jsonify({'initial_amount': None}), 404
+
 
 
 # Route: Logout

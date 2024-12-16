@@ -44,17 +44,17 @@
 <body>
     <div class="login-card">
         <h3 class="text-center text-success mb-4">Sign In</h3>
-        <form>
+        <form method="POST" action="/login">
             <div class="mb-3">
-                <label for="username" class="form-label">Username</label>
-                <input type="text" class="form-control" id="username" placeholder="&#xf007; Username" style="font-family: Arial, FontAwesome;">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control"  name="email" required placeholder="&#xf007; Username" style="font-family: Arial, FontAwesome;">
             </div>
             <div class="mb-3">
                 <label for="password" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password" placeholder="&#xf084; Password" style="font-family: Arial, FontAwesome;">
+                <input type="password" class="form-control"name="password" required placeholder="&#xf084; Password" style="font-family: Arial, FontAwesome;">
             </div>
             <div class="d-grid">
-                <a href="/dashboard.html" type="submit" class="btn btn-success">Sign In</a>
+                <button type="submit" class="btn btn-success">Login</button>
             </div>
         </form>
     </div>

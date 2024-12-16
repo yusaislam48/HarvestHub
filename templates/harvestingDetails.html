@@ -121,43 +121,54 @@
         <div class="profile-section">
           <div class="form-container">
             <h3>Harvesting Details</h3>
-            <form>
+            <form method="POST" action="/harvesting_details">
               <div class="mb-3 mt-5">
-                <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  Select Farmer
-                </button>
-                <ul class="dropdown-menu">
-                  <li><a class="dropdown-item" href="#">Farmer 1</a></li>
-                  <li><a class="dropdown-item" href="#">Farmer 2</a></li>
-                  <li><a class="dropdown-item" href="#">Farmer 3</a></li>
-                </ul>
+                <label for="farmer" class="form-label">Select Farmer</label>
+                <select class="form-select dropdown-toggle" id="farmer" name="farmer_id" required>
+                  <option value="" selected disabled>Choose Farmer</option>
+                  {% for farmer in farmers %}
+                  <option value="{{ farmer['id'] }}">{{ farmer['name'] }}</option>
+                  {% endfor %}
+                </select>
               </div>
               <div class="mb-3">
                 <label for="harvestId" class="form-label">Harvest ID</label>
-                <input type="text" class="form-control" id="harvestId" placeholder="example">
+                <input type="text" class="form-control" id="harvestId" name="harvest_id" placeholder="Enter Harvest ID" required>
               </div>
               <div class="mb-3">
                 <label for="amountQuantity" class="form-label">Amount/Quantity</label>
-                <input type="text" class="form-control" id="amountQuantity" placeholder="example">
+                <input type="text" class="form-control" id="amountQuantity" name="amount" placeholder="Enter Amount or Quantity" required>
               </div>
               <div class="mb-3">
                 <label for="cropType" class="form-label">Crop Type</label>
-                <input type="text" class="form-control" id="cropType" placeholder="example">
+                <select class="form-select dropdown-toggle" id="cropType" name="crop_type" onchange="updateCropId()" required>
+                  <option value="" selected disabled>Choose Crop</option>
+                  {% for crop in crops %}
+                  <option value="{{ crop['crop_name'] }}" data-id="{{ crop['crop_id'] }}">{{ crop['crop_name'] }}</option>
+                  {% endfor %}
+                </select>
               </div>
               <div class="mb-3">
                 <label for="cropId" class="form-label">Crop ID</label>
-                <input type="text" class="form-control" id="cropId" placeholder="example">
+                <input type="text" class="form-control" id="cropId" name="crop_id" readonly>
               </div>
               <div class="mb-3">
                 <label for="season" class="form-label">Season</label>
-                <input type="text" class="form-control" id="season" placeholder="example">
+                <select class="form-select dropdown-toggle" id="season" name="season" required>
+                  <option value="" selected disabled>Choose Season</option>
+                  {% for season in seasons %}
+                  <option value="{{ season['season_name'] }}">{{ season['season_name'] }}</option>
+                  {% endfor %}
+                </select>
               </div>
               <div class="mb-3">
                 <label for="date" class="form-label">Date</label>
-                <input type="date" class="form-control" id="date">
+                <input type="date" class="form-control" id="date" name="harvest_date" required>
               </div>
               <button type="submit" class="btn btn-success">Submit</button>
             </form>
+            
+            
           </div>
         </div>
       </div>
@@ -181,6 +192,17 @@
     function hidePopup() {
       document.getElementById('successPopup').style.display = 'none';
     }
+    function updateCropId() {
+      const cropTypeSelect = document.getElementById('cropType');
+      const cropIdField = document.getElementById('cropId');
+  
+      // Get the selected option
+      const selectedOption = cropTypeSelect.options[cropTypeSelect.selectedIndex];
+      
+      // Update the Crop ID field with the data-id attribute of the selected option
+      cropIdField.value = selectedOption.getAttribute('data-id');
+    }
+    
   </script>
 </body>
 </html>

@@ -17,7 +17,7 @@
     }
     .sidebar {
       background-color: #F7F6F9;
-      height: 100vh;
+      height: 230vh;
       padding-top: 20px;
     }
     .sidebar a {
@@ -42,14 +42,14 @@
       border-radius: 10px;
     }
     .stats-card {
-      background-color: #f9f9f9;
+      background-color: #E9ECEF;
       border-radius: 10px;
       text-align: center;
       padding: 20px;
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
     .stats-card h4 {
-      color: #666;
+      color: #00000;
     }
     .stats-card span {
       font-size: 24px;
@@ -93,35 +93,35 @@
         <div class="profile-section">
           <!-- Dashboard Overview -->
           <h3>Dashboard</h3>
-          <div class="row text-center my-4">
+          <div class="row text-center my-4 mt-5">
             <div class="col-md-3">
               <div class="stats-card">
                 <h4>Total Farmers</h4>
-                <span id="totalFarmers">{{ total_farmers }}</span>
+                <span class="text-success" id="totalFarmers">{{ total_farmers }}</span>
               </div>
             </div>
             <div class="col-md-3">
               <div class="stats-card">
                 <h4>Total Harvest</h4>
-                <span id="totalHarvest">{{ total_harvest }}</span>
+                <span class="text-warning" id="totalHarvest">{{ total_harvest }}</span>
               </div>
             </div>
             <div class="col-md-3">
               <div class="stats-card">
                 <h4>Total Officers</h4>
-                <span id="totalOfficers">{{ total_officers }}</span>
+                <span class="text-info" id="totalOfficers">{{ total_officers }}</span>
               </div>
             </div>
             <div class="col-md-3">
               <div class="stats-card">
                 <h4>Total Losses</h4>
-                <span id="totalLosses">{{ total_losses }}</span>
+                <span class="text-danger" id="totalLosses">{{ total_losses }}</span>
               </div>
             </div>
           </div>
 
           <!-- Table Section -->
-          <h5>Farmers List</h5>
+          <h5 class=" mt-5">Farmers List</h5>
           <!-- Farmers Table -->
           <table class="table table-hover">
             <thead>
@@ -154,6 +154,24 @@
               {% endfor %}
             </tbody>
           </table>
+          <div class="row mt-5">
+            <div class="col-md-6">
+              <h5>Seasonal Distribution</h5>
+              <canvas id="pieChart" width="500" height="300"></canvas>
+            </div>
+            <div class="col-md-6">
+              <h5>Loss Data</h5>
+              <canvas id="barChart" width="500" height="300"></canvas>
+            </div>
+            <div class="col-md-6 mt-4">
+              <h5>Harvest Trends</h5>
+              <canvas id="lineChart" width="500" height="300"></canvas>
+            </div>
+            <div class="col-md-6 mt-4">
+              <h5>Regional Farmer Count</h5>
+              <canvas id="columnChart" width="500" height="300"></canvas>
+            </div>
+          </div>
 
           <!-- Edit Modal -->
           <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
@@ -268,7 +286,70 @@
     });
 
   </script>
-  
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // Pie Chart
+    const ctxPie = document.getElementById('pieChart').getContext('2d');
+    new Chart(ctxPie, {
+      type: 'pie',
+      data: {
+        labels: ['Spring', 'Summer', 'Autumn'],
+        datasets: [{
+          data: [40, 32, 28],
+          backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+        }]
+      }
+    });
+
+    // Bar Chart
+    const ctxBar = document.getElementById('barChart').getContext('2d');
+    new Chart(ctxBar, {
+      type: 'bar',
+      data: {
+        labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+        datasets: [{
+          label: 'Loss Data',
+          data: [1500, 2000, 2500, 3500, 2700],
+          backgroundColor: '#FF9F40'
+        }]
+      }
+    });
+
+    // Line Chart
+    const ctxLine = document.getElementById('lineChart').getContext('2d');
+    new Chart(ctxLine, {
+      type: 'line',
+      data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+        datasets: [{
+          label: 'Harvest Trends',
+          data: [10, 15, 20, 25, 30],
+          borderColor: '#4BC0C0',
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          fill: true
+        }]
+      }
+    });
+
+    // Column Chart
+    const ctxColumn = document.getElementById('columnChart').getContext('2d');
+    new Chart(ctxColumn, {
+      type: 'bar',
+      data: {
+        labels: ['Region 1', 'Region 2', 'Region 3', 'Region 4'],
+        datasets: [{
+          label: 'Farmer Count',
+          data: [120, 150, 100, 180],
+          backgroundColor: '#9966FF'
+        }]
+      },
+      options: {
+        indexAxis: 'y', // Horizontal Bar
+      }
+    });
+  </script>
+    
            
 </body>
 </html>

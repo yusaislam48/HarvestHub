@@ -5,6 +5,33 @@
 
 ---
 
+## **Screenshots**
+1. **Login Page**  
+   ![Dashboard Screenshot](screenshots/login.png)
+
+2. **Dashboard Page**  
+   ![Dashboard Screenshot](screenshots/dashboard.png)
+
+3. **Profile Page**  
+   ![Loss Records Screenshot](screenshots/profile.png)
+
+4. **Add New Farmer Page**  
+   ![Loss Records Screenshot](screenshots/add_new_farmer.png)
+
+5. **Harvesting Details Page**  
+   ![Loss Records Screenshot](screenshots/harvesting_details.png)
+
+6. **Loss Records Page**  
+   ![Loss Records Screenshot](screenshots/loss_record.png)
+
+7. **Analytics and Reports**  
+   ![Reports Screenshot](screenshots/analytics_and_report.png)
+
+8. **Prevention**  
+   ![Reports Screenshot](screenshots/prevension.png)
+
+---
+
 ## **Features**
 1. **User Authentication**  
    - Secure login for area officers.  
@@ -102,33 +129,6 @@ pip install -r requirements.txt
 | `/generate_report`      | GET    | Generate PDF reports             |
 | `/delete_farmer/<id>`   | POST   | Delete a farmer record           |
 | `/edit_farmer/<id>`     | POST   | Edit farmer details              |
-
----
-
-## **Screenshots**
-1. **Login Page**  
-   ![Dashboard Screenshot](screenshots/login.png)
-
-2. **Dashboard Page**  
-   ![Dashboard Screenshot](screenshots/dashboard.png)
-
-3. **Profile Page**  
-   ![Loss Records Screenshot](screenshots/profile.png)
-
-4. **Add New Farmer Page**  
-   ![Loss Records Screenshot](screenshots/add_new_farmer.png)
-
-5. **Harvesting Details Page**  
-   ![Loss Records Screenshot](screenshots/harvesting_details.png)
-
-6. **Loss Records Page**  
-   ![Loss Records Screenshot](screenshots/loss_record.png)
-
-7. **Analytics and Reports**  
-   ![Reports Screenshot](screenshots/analytics_and_report.png)
-
-8. **Prevention**  
-   ![Reports Screenshot](screenshots/prevension.png)
 
 
 ---

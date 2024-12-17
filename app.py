@@ -589,6 +589,130 @@ def generate_report():
 
 ## generate report end
 
+@app.route('/prevention', methods=['GET'])
+def prevention():
+    db = get_db_connection()
+    cursor = db.cursor(dictionary=True)
+
+    # Fetch all farmers for the dropdown
+    cursor.execute("SELECT id, name FROM farmers")
+    farmers = cursor.fetchall()
+
+    cursor.close()
+    db.close()
+
+    # Render prevention.html with the list of farmers
+    return render_template('prevention.html', farmers=farmers)
+
+@app.route('/get_loss_reasons', methods=['POST'])
+def get_loss_reasons():
+    data = request.json
+    farmer_id = data['farmer_id']
+    harvest_id = data['harvest_id']
+
+    db = get_db_connection()
+    cursor = db.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT 
+            COALESCE(hs.loss_reason, '') AS harvesting_reason,
+            COALESCE(hnd.loss_reason, '') AS handling_reason,
+            COALESCE(ss.loss_reason, '') AS storage_reason,
+            COALESCE(ts.loss_reason, '') AS transport_reason
+        FROM harvest_details h
+        LEFT JOIN harvesting_stage hs ON hs.harvest_id = h.id
+        LEFT JOIN handling_stage hnd ON hnd.harvest_id = h.id
+        LEFT JOIN storage_stage ss ON ss.harvest_id = h.id
+        LEFT JOIN transportation_stage ts ON ts.harvest_id = h.id
+        WHERE h.id = %s AND h.farmer_id = %s
+    """, (harvest_id, farmer_id))
+
+    result = cursor.fetchone()
+    cursor.close()
+    db.close()
+
+    return jsonify(result)
+
+
+
+@app.route('/dashboard')
+def dashboard():
+    db = get_db_connection()
+    cursor = db.cursor(dictionary=True)
+
+    # Fetch total counts
+    cursor.execute("SELECT COUNT(*) AS total FROM farmers")
+    total_farmers = cursor.fetchone()['total']
+
+    cursor.execute("SELECT COUNT(*) AS total FROM harvest_details")
+    total_harvest = cursor.fetchone()['total']
+
+    cursor.execute("SELECT COUNT(*) AS total FROM area_officers")
+    total_officers = cursor.fetchone()['total']
+
+    cursor.execute("""
+        SELECT SUM(loss_amount) AS total_loss 
+        FROM harvesting_stage 
+        UNION ALL SELECT SUM(loss_amount) FROM handling_stage 
+        UNION ALL SELECT SUM(loss_amount) FROM storage_stage 
+        UNION ALL SELECT SUM(loss_amount) FROM transportation_stage
+    """)
+    total_losses = sum(row['total_loss'] or 0 for row in cursor.fetchall())
+
+    # Fetch farmers list
+    cursor.execute("""
+        SELECT farmers.id, farmers.name, region.region_name, farmers.area, farmers.phone
+        FROM farmers 
+        JOIN region ON farmers.region_id = region.id
+    """)
+    farmers = cursor.fetchall()
+
+    cursor.close()
+    db.close()
+
+    return render_template('dashboard.html', total_farmers=total_farmers, total_harvest=total_harvest,
+                           total_officers=total_officers, total_losses=total_losses, farmers=farmers)
+
+
+
+@app.route('/edit_farmer/<int:farmer_id>', methods=['POST'])
+def edit_farmer(farmer_id):
+    db = get_db_connection()
+    cursor = db.cursor()
+    try:
+        data = request.get_json()
+        cursor.execute("""
+            UPDATE farmers 
+            SET name = %s, area = %s, phone = %s, region_id = (SELECT id FROM region WHERE region_name = %s LIMIT 1)
+            WHERE id = %s
+        """, (data['name'], data['area'], data['phone'], data['region'], farmer_id))
+        db.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+    finally:
+        cursor.close()
+        db.close()
+
+
+
+
+@app.route('/delete_farmer/<int:farmer_id>', methods=['POST'])
+def delete_farmer(farmer_id):
+    db = get_db_connection()
+    cursor = db.cursor()
+    try:
+        cursor.execute("DELETE FROM farmers WHERE id = %s", (farmer_id,))
+        db.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+    finally:
+        cursor.close()
+        db.close()
+
+
+
 # Route: Logout
 @app.route('/logout')
 def logout():

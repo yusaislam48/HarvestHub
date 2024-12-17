@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Improvement Recommendations</title>
+  <!-- Google Font: Montserrat -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Montserrat', sans-serif;
+    }
+    .navbar {
+      background-color: #D9E3C6; 
+    }
+    .sidebar {
+      background-color: #F7F6F9; 
+      height: 100vh;
+      padding-top: 20px;
+    }
+    .sidebar a {
+      display: block;
+      padding: 10px 15px;
+      color: #333;
+      text-decoration: none;
+      margin-bottom: 10px;
+    }
+    .sidebar a:hover {
+      background-color: #e9ecef;
+      border-radius: 5px;
+    }
+    .sidebar a.active {
+      color: #28a745;
+      font-weight: bold;
+    }
+    .profile-section {
+      background-color: #f9f9f9;
+      margin: 40px;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    .form-label {
+      font-weight: 600;
+    }
+    .recommendations {
+      resize: none;
+      background-color: #e9ecef;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">HarvestHUB</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="#">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">About</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Contact Us</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Help</a></li>
+        </ul>
+        <form class="d-flex ms-3">
+          <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+          <button class="btn btn-outline-success" type="submit">Search</button>
+        </form>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Layout -->
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <div class="col-md-2 sidebar">
+        <a href="/areaOfficersProfile.html">Profile</a>
+        <a href="/dashboard.html">Dashboard</a>
+        <a href="/addNewFarmer.html">Add New Farmer</a>
+        <a href="/harvestingDetails.html">Harvesting Details</a>
+        <a href="/lossRecord.html">Loss Record</a>
+        <a href="/analyticsAndReports.html">Analytics & Reports</a>
+        <a href="#" class="active">Prevention</a>
+        <a href="/home.html" class="text-danger">Log Out</a>
+      </div>
+
+      <!-- Main Content -->
+      <div class="col-md-10">
+        <div class="profile-section">
+          <h3 class="fw-bold mb-4">Improvement Recommendations</h3>
+          <!-- Farmer and Harvest ID Dropdowns -->
+          <div class="row mb-4">
+            <div class="col-md-6">
+                
+              <label for="farmer" class="form-label">Select Farmer</label>
+              <select class="form-select" id="farmer">
+                <option selected disabled>Choose Farmer</option>
+                {% for farmer in farmers %}
+                  <option value="{{ farmer.id }}">{{ farmer.name }}</option>
+                {% endfor %}
+              </select>
+              
+            </div>
+            <div class="col-md-6">
+              <label for="harvestId" class="form-label">Select Harvest ID</label>
+              <select class="form-select" id="harvestId">
+                <option selected disabled>Choose Harvest ID</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Stages Table -->
+          <div class="row">
+            <div class="col-md-2"><b>Before</b></div>
+            <div class="col-md-10"><b>Recommendations</b></div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-2">
+              <label>Harvesting</label>
+              <input type="text" class="form-control" id="harvestingBefore" readonly>
+            </div>
+            <div class="col-md-10">
+              <textarea class="form-control recommendations" id="harvestingRec" rows="2" readonly></textarea>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-2">
+              <label>Handling</label>
+              <input type="text" class="form-control" id="handlingBefore" readonly>
+            </div>
+            <div class="col-md-10">
+              <textarea class="form-control recommendations" id="handlingRec" rows="2" readonly></textarea>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-2">
+              <label>Storage</label>
+              <input type="text" class="form-control" id="storageBefore" readonly>
+            </div>
+            <div class="col-md-10">
+              <textarea class="form-control recommendations" id="storageRec" rows="2" readonly></textarea>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-2">
+              <label>Transportation</label>
+              <input type="text" class="form-control" id="transportBefore" readonly>
+            </div>
+            <div class="col-md-10">
+              <textarea class="form-control recommendations" id="transportRec" rows="2" readonly></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const recommendations = {
+      "Pests": "Use pest-resistant crops and apply appropriate pesticides.",
+      "Diseases": "Adopt crop rotation and disease-resistant varieties.",
+      "Adverse Weather": "Use weather forecast tools and climate-resilient seeds.",
+      "Poor Handling": "Train workers in proper post-harvest handling techniques.",
+      "Lack of Storage": "Invest in modern storage facilities and warehouses.",
+      "Transportation Issues": "Improve transportation infrastructure and timing.",
+      "Theft": "Implement security measures like CCTV or guards.",
+      "Market Glut": "Diversify crops and explore alternative markets.",
+      "Low Prices": "Implement better pricing strategies and explore export opportunities.",
+      "Improper Drying": "Use modern drying techniques and facilities.",
+      "Packaging Issues": "Invest in improved packaging materials.",
+      "Delayed Harvesting": "Optimize harvest scheduling based on maturity.",
+      "Processing Loss": "Upgrade processing equipment and reduce human error.",
+      "Infrastructure Issues": "Collaborate with government bodies to improve infrastructure.",
+      "Others": "Review and address specific causes with experts."
+    };
+
+    // Fetch Harvest IDs on Farmer Selection
+    document.getElementById('farmer').addEventListener('change', function () {
+      const farmerId = this.value;
+      fetch(`/get_harvest_ids/${farmerId}`)
+        .then(response => response.json())
+        .then(harvestIds => {
+          const harvestSelect = document.getElementById('harvestId');
+          harvestSelect.innerHTML = '<option selected disabled>Choose Harvest ID</option>';
+          harvestIds.forEach(id => {
+            harvestSelect.innerHTML += `<option value="${id.id}">${id.id}</option>`;
+          });
+        });
+    });
+
+    // Fetch Loss Reasons and Set Recommendations
+    document.getElementById('harvestId').addEventListener('change', function () {
+      const farmerId = document.getElementById('farmer').value;
+      const harvestId = this.value;
+
+      fetch('/get_loss_reasons', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ farmer_id: farmerId, harvest_id: harvestId })
+      })
+        .then(response => response.json())
+        .then(data => {
+          setStageData('harvesting', data.harvesting_reason);
+          setStageData('handling', data.handling_reason);
+          setStageData('storage', data.storage_reason);
+          setStageData('transport', data.transport_reason);
+        });
+    });
+
+    function setStageData(stage, reason) {
+      document.getElementById(`${stage}Before`).value = reason || 'N/A';
+      document.getElementById(`${stage}Rec`).value = recommendations[reason] || "No recommendation available.";
+    }
+  </script>
+</body>
+</html>

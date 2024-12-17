@@ -17,6 +17,10 @@ def get_db_connection():
     return mysql.connector.connect(**DB_CONFIG)
 
 # Route: Home/Login Page
+@app.route('/home')
+def home():
+    return render_template('home.html')
+
 @app.route('/')
 def login():
     return render_template('login.html')
